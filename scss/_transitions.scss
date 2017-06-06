@@ -12,6 +12,9 @@
   &.show {
     display: block;
   }
+  &.flexshow {
+    display: flex;
+  }
 }
 
 tr {
