@@ -40,7 +40,7 @@
     "js-test": "phantomjs ./node_modules/qunit-phantomjs-runner/runner.js js/tests/index.html 60",
     "js-test-cloud": "ruby -r webrick -e \"s = WEBrick::HTTPServer.new(:Port => 3000, :DocumentRoot => Dir.pwd, :Logger => WEBrick::Log.new('/dev/null'), :AccessLog => []); trap('INT') { s.shutdown }; s.start\" & grunt saucelabs-qunit",
     "docs": "npm-run-all docs-compile docs-lint",
-    "docs-lint": "htmllint --rc build/.htmllintrc _gh_pages/*.html _gh_pages/**/*.html js/tests/visual/*.html",
+    "docs-lint": "node ./build/html-validator.js",
     "docs-compile": "bundle exec jekyll build",
     "docs-serve": "bundle exec jekyll serve",
     "docs-github": "shx echo 'github: true' > $npm_config_tmp/twbsconfig.yml && npm run docs-compile -- --config _config.yml,$npm_config_tmp/twbsconfig.yml && shx rm $npm_config_tmp/twbsconfig.yml",
@@ -71,6 +71,7 @@
     "popper.js": "^1.11.0"
   },
   "devDependencies": {
+    "async": "^2.5.0",
     "autoprefixer": "^7.1.2",
     "babel-cli": "^6.24.1",
     "babel-eslint": "^7.2.3",
@@ -81,7 +82,7 @@
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
     "grunt-saucelabs": "^9.0.0",
-    "htmllint-cli": "^0.0.6",
+    "html-validator-cli": "^3.2.0",
     "node-sass": "^4.5.3",
     "nodemon": "^1.11.0",
     "npm-run-all": "^4.0.2",
