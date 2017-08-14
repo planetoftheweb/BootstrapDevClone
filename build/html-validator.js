@@ -7,24 +7,59 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 
-/* eslint-env shelljs */
-
 'use strict'
 
-require('shelljs/make')
-config.fatal = false
-
+const fs = require('fs')
 const path = require('path')
 const async = require('async')
+const glob = require('glob')
+const validator = require('html-validator')
 
-const VALIDATOR = path.join(__dirname, '../node_modules/.bin/html-validator')
+const validatorLimit = 10
+
+const validatorOptions = {
+  format: 'text',
+  ignore: [
+    'Error: Element “img” is missing required attribute “src”.',
+    'Warning: The “main” role is unnecessary for element “main”.'
+  ],
+  validator: 'https://checker.html5.org'
+}
+
 const GH_PAGES_DIR = path.join(__dirname, '../_gh_pages/')
 
-const files = find(GH_PAGES_DIR + '**/*.html')
+glob(path.join(GH_PAGES_DIR, '**/*.html'), function (er, files) {
+  if (er) {
+    throw er
+  }
 
-async.each(files, (file) => {
-  const f = path.normalize(file)
+  async.eachLimit(files, validatorLimit, (file, cb) => {
+    const f = path.normalize(file)
 
-  echo(`Running: html-validator --file=${f}`)
-  exec(`${VALIDATOR} --file=${f} --verbose --ignore='Error: Element “img” is missing required attribute “src”.' --ignore='Warning: The “main” role is unnecessary for element “main”.'`)
+    fs.readFile(f, 'utf8', (err, html) => {
+      if (err) {
+        //throw err
+        cb(err)
+      }
+
+      console.log(`Validating ${f}`)
+
+      validatorOptions.data = html
+
+      validator(validatorOptions, (error, data) => {
+        if (error) {
+          console.error(error)
+          cb(error)
+        }
+
+        console.log(data)
+        cb()
+      })
+
+    })
+  }, (err) => {
+    if (err) {
+      console.error('Something went wrong')
+    }
+  })
 })
